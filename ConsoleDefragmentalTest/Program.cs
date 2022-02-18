@@ -66,7 +66,8 @@ namespace CombatTest
         //fate is the default random object
         public static int dieRoll(int die, Random fate)
         {
-            return fate.Next(die) + 1;
+            int roll = fate.Next(die + 1);
+            return roll;
         }
         //subtraction, but as a method
         public static int opposedRoll(int attacker, int defender)
