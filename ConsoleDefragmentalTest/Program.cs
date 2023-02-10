@@ -24,7 +24,7 @@ namespace CombatTest
         //damageDie is there for testing, it'll be replaced later on
         //for now it serves as the way to resolve injury
         public int damageDie;
-        public String displayStats()
+        public String DisplayStats()
         {
             string stats = $"{name} \n {currentHP}/{maxHP}HP\n Power: {power}   Precision: {precision} \n Endurance: {endurance}   Agility {agility}";
             return stats;
@@ -56,7 +56,7 @@ namespace CombatTest
             agility = AGI;
             damageDie = DIE;
             currentHP = MAXHP;
-            statString = displayStats();
+            statString = DisplayStats();
         }
     }
     //all functions for dice chucking are contained here
@@ -64,28 +64,35 @@ namespace CombatTest
     {
         //roll a die of size die
         //fate is the default random object
-        public static int dieRoll(int die, Random fate)
+        public static int DieRoll(int die, Random fate)
         {
             int roll = fate.Next(die + 1);
             return roll;
         }
         //subtraction, but as a method
-        public static int opposedRoll(int attacker, int defender)
+        public static int OpposedRoll(int attacker, int defender)
         {
             return attacker - defender;
+        }
+        //generates the nth triangular number for an input integer n
+        //please don't pass it negative values
+        public static int TriangularNumber(int n)
+        {
+            int triangularNumber = n * (n + 1) / 2;
+            return triangularNumber;
         }
         //rolls a number of dice of size die equal to the total stat offered as input.
         //if the value is the maximum, roll two more
         //basic parameters for testing, can be modified later
         //prints out a string for player clarity and testing
-        public static int statRoll(int totalStat, Random fate, int skew = 0, int die = 8, int bonusRolls = 2, int critMod = 0, int successValue = 6)
+        public static int StatRoll(int totalStat, Random fate, int skew = 0, int die = 8, int bonusRolls = 2, int critMod = 0, int successValue = 6)
         {
             int realDie;
             realDie = die + skew;
             int hits = 0;
             for (int i = 0; i < totalStat; i++)
             {
-                int currentRoll = dieRoll(realDie, fate);
+                int currentRoll = DieRoll(realDie, fate);
                 Console.Write($" {currentRoll}");
                 if (currentRoll == realDie - critMod)
                 {
@@ -107,43 +114,41 @@ namespace CombatTest
     {
         //rolls a number of damage dice equal to the nth triangular number 
         //where n is the successes value
-        public int damageRoll(int successes, int die, Random fate)
+        public int DamageRoll(int successes, int die, Func<int, int> func, Random fate)
         {
             int damage = 0;
-            for (int i = 1; successes >= i; i++)
+            for (int i = 1; func(successes) >= i; i++)
             {
-                for (int j = 1; i >= j; j++)
-                {
-                    int damageDieRoll = DiceMechanics.dieRoll(die, fate);
+
+                    int damageDieRoll = DiceMechanics.DieRoll(die, fate);
                     damage += damageDieRoll;
-                }
-            }
+                            }
             return damage;
         }
         //damage is dealt to a target entity and is subtracted from their current HP
-        public void dealDamage(Entity target, int damage)
+        public void DealDamage(Entity target, int damage)
         {
-            target.currentHP = target.currentHP - damage;
+            target.currentHP =- damage;
         }
         //attacker and defender make opposed die rolls to determine if an attack hits
         //if attacker has more successes
         //damage is dealt proportionally
         //if not
         //damage is not dealt
-        public void attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed)
+        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed)
         {
             Console.Write("Attacker's Results: ");
-            int attackerHits = DiceMechanics.statRoll(attackingStat, fate, skewUsed);
+            int attackerHits = DiceMechanics.StatRoll(attackingStat, fate, skewUsed);
             Console.ReadKey();
             Console.Write("Defender's results: ");
-            int defenderHits = DiceMechanics.statRoll(defendingStat, fate, 0);
+            int defenderHits = DiceMechanics.StatRoll(defendingStat, fate, 0);
             Console.ReadKey();
-            int netHits = DiceMechanics.opposedRoll(attackerHits, defenderHits);
+            int netHits = DiceMechanics.OpposedRoll(attackerHits, defenderHits);
             if (netHits > 0)
             {
                 Console.WriteLine($"{netHits} more successes!");
-                int damageTotal = damageRoll(netHits, attacker.damageDie, fate);
-                dealDamage(defender, damageTotal);
+                int damageTotal = DamageRoll(netHits, attacker.damageDie, DiceMechanics.TriangularNumber, fate);
+                DealDamage(defender, damageTotal);
                 Console.WriteLine($"The swing connects for {damageTotal} damage.");
             }
         }
@@ -151,7 +156,7 @@ namespace CombatTest
         //the monster appears and is displayed
         //then the player has a choice of actions
         //so far (4/30/2021): the player only has the option of bonking it over the head or bonking it over the head more precisely
-        public void fightLoop(Gamestate protagonist, Monster foe, Random fate)
+        public void FightLoop(Gamestate protagonist, Monster foe, Random fate)
         {
             Console.WriteLine($"The {foe.name} approaches!");
             String statBlock = foe.statString;
@@ -177,12 +182,12 @@ namespace CombatTest
                 if (actionChoice == "h")
                 {
                     Console.WriteLine("You swing boldly.");
-                    attack(protagonist, foe, protagonist.power, foe.endurance, fate, skewUsed);
+                    Attack(protagonist, foe, protagonist.power, foe.endurance, fate, skewUsed);
                 }
                 else if (actionChoice == "p")
                 {
                     Console.Write("You swing precisely.");
-                    attack(protagonist, foe, protagonist.precision, foe.agility, fate, skewUsed);
+                    Attack(protagonist, foe, protagonist.precision, foe.agility, fate, skewUsed);
                 }
                 else
                 {
@@ -192,7 +197,7 @@ namespace CombatTest
                 }
                 if (foe.currentHP < 1) { break; }
                 Console.WriteLine($"It is now the {foe.name}'s turn.");
-                attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0);
+                Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0);
             }
             Console.WriteLine($"The {foe.name} is slain!");
             Console.ReadKey();
@@ -216,7 +221,7 @@ namespace CombatTest
             currentSkew = maxSkew;
             bool isLookingUp;
             bool isLookingRight;
-            statString = displayStats();
+            statString = DisplayStats();
             int[][] map;
         }
         //generates an integer array
@@ -256,7 +261,7 @@ namespace CombatTest
             Console.WriteLine(currentState.statString);
             Monster currentMonster = new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3);
             CombatMechanics combat = new CombatMechanics();
-            combat.fightLoop(currentState, currentMonster, whimsOfFate);
+            combat.FightLoop(currentState, currentMonster, whimsOfFate);
         }
     }
 }
