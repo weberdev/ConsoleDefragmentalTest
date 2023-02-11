@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using System;
 using Random = System.Random;
 
 namespace mapMaker
 {
 
-    public class Map : MonoBehaviour
+    public class Map 
     {
         public char[,] positions;
         public int spawnX;
