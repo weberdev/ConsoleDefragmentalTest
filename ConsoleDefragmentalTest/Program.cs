@@ -184,7 +184,7 @@ namespace CombatTest
         //damage is dealt to a target entity and is subtracted from their current HP
         public void DealDamage(Entity target, int damage)
         {
-            target.currentHP =- damage;
+            target.currentHP -= damage;
         }
         //attacker and defender make opposed die rolls to determine if an attack hits
         //if attacker has more successes
@@ -303,6 +303,7 @@ namespace CombatTest
             Console.ReadKey();
             int listLength = MonsterTable.Count;
             Monster currentMonster = MonsterTable[fate.Next(listLength)];
+            currentMonster = currentMonster.CopyMonster(currentMonster);
             CombatMechanics combat = new CombatMechanics();
             protagonist.UpdateCharacterSheet();
             combat.FightLoop(protagonist, currentMonster, fate);
