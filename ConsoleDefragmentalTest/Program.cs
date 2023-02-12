@@ -389,7 +389,25 @@ namespace CombatTest
     {
         public static string SPCToString(StandardPlayingCard card)
         {
-            String s = RankToInt(card.Rank).ToString() + SuitToChar(card.Suit);
+            int cardRank = RankToInt(card.Rank);
+            String cardRankString;
+            if(cardRank == 13)
+            {
+                cardRankString = "K";
+            }
+            else if(cardRank == 12)
+            {
+                cardRankString = "Q";
+            }
+            else if (cardRank == 11)
+            {
+                cardRankString = "J";
+            }
+            else
+            {
+                cardRankString = cardRank.ToString();
+            }
+            String s = cardRankString + SuitToChar(card.Suit);
             return s;
         }
 
