@@ -108,9 +108,13 @@ namespace CombatTest
     }
 
     //Gamestate tracks the player's attributes and position.
+    //The player *is* the Gamestate.
+    //This may not be ideal, but given that the game is intended to be single player, it's fine.
     public class Gamestate : Entity
     {
-
+        //skew is spent as a resource to influence random mechanics
+        //There is a real chance that it, even though it is the secret sauce of the designer, will prove to be unimportant in gameplay
+        //If that is the case, it will be rebalanced.
         public int maxSkew = 8;
         public int currentSkew;
         public Gamestate(string Name, int MAXHP, int PWR, int PRC, int END, int AGI, int DIE)
