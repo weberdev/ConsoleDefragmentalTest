@@ -5,6 +5,14 @@ using Xyaneon.Games.Cards.StandardPlayingCards;
 
 namespace CombatTest
 {
+    //Will be implemented later
+    public enum AttributeType
+    {
+        Power = 0,
+        Precision = 0,
+        Endurance = 0,
+        Agility = 0
+    }
     //Entity is the base class for creatures involved in combat
     //weirdly enough, also the gamestate
     public class Entity
@@ -22,6 +30,10 @@ namespace CombatTest
         //endurance and agility are for defense
         public int endurance;
         public int agility;
+        public AttributeType Power { get => Power; set => Power = value; }
+        public AttributeType Precision { get => Precision; set => Precision = value; }
+        public AttributeType Endurance { get => Endurance; set => Endurance = value; }
+        public AttributeType Agility { get => Agility; set => Agility = value; }
         //statString holds the basic attributes for player perusal
         public string statString;
         //damageDie is there for testing, it'll be replaced later on
@@ -30,6 +42,7 @@ namespace CombatTest
         //only the player will have a deck of cards at this stage
         //it's in entity instead of GameState because it's easier to pass a different function this way
         //more to the point, it also allows for non-player entities to use decks later on
+        //this is my excuse
         public StandardPlayingCardDeck Deck = new(false, 0);
         public List<StandardPlayingCard> Discard = new();
         public string DisplayStats()
@@ -45,20 +58,9 @@ namespace CombatTest
     }
 
     //Monster as a class is easier and cleaner than entity and allows for moderately more clarity for myself when writing code
-    //Monster as a class is easier and cleaner than entity and allows for moderately more clarity for myself when writing code
     public class Monster : Entity
-    {   //this is a constructor
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="Name"></param>
-        /// <param name="MAXHP"></param>
-        /// <param name="PWR"></param>
-        /// <param name="PRC"></param>
-        /// <param name="END"></param>
-        /// <param name="AGI"></param>
-        /// <param name="DIE"></param>
+    {   
+        //this is a constructor
         public Monster(string Name, int MAXHP, int PWR, int PRC, int END, int AGI, int DIE)
         {
             name = Name;
@@ -71,6 +73,8 @@ namespace CombatTest
             currentHP = MAXHP;
             statString = DisplayStats();
         }
+        //this takes an existing monster template
+        //and pushes it somewhere
         public Monster CopyMonster(Monster baseMonster)
         {
             Monster thisMonster = new("Proteus", 0, 0, 0, 0, 0, 0)
@@ -88,8 +92,7 @@ namespace CombatTest
             return thisMonster;
         }
     }
-    //all functions for dice chucking are contained here
-    
+    //this class will be expanded when moving from console to unity
     public class Location
     {
         public List<Monster> MonsterTable;
@@ -104,8 +107,6 @@ namespace CombatTest
         }
     }
 
-    //Not that much here at this point, just a different version of DiceMechanics for card implementation.
-    
     //Gamestate tracks the player's attributes and position.
     public class Gamestate : Entity
     {
@@ -128,12 +129,21 @@ namespace CombatTest
             statString = DisplayStats();
             int[][] map;
         }
+        //GainStats:
+        //whenever the player would gain stats, this function is called
+        //the player rolls for each of their attributes
+        //if they get fewer than $threshold successes on that roll, they increment the attribute by one
+        //the total number of attributes not increased is added to their currentHP and maxHP
+        //IMPLICATIONS:
+        //as attributes go up, the likelihood of them increasing goes down
+        //this implies that as attributes increase, maxHP is likely to increase instad
+        //given how swingy the game's mechanics are (BY DESIGN), this isn't as good as it sounds
         public void GainStats(Random fate, int threshold)
         {
             Console.WriteLine($"You have won. Each attribute will increase if you achieve *fewer* than {threshold} successes on the roll.");
             int unchangedAttributes = 4;
             Console.WriteLine("Trying power.");
-            if (DiceMechanics.QuietRoll(power, fate, 0) < threshold)
+            if (DiceMechanics.QuietRoll(power, fate, this, 0) < threshold)
             {
                 power++;
                 Console.WriteLine("Your power increased!\n");
@@ -141,21 +151,21 @@ namespace CombatTest
             }
             Console.WriteLine("Trying precision");
 
-            if (DiceMechanics.QuietRoll(precision, fate, 0) < threshold)
+            if (DiceMechanics.QuietRoll(precision, fate, this, 0) < threshold)
             {
                 precision++;
                 Console.WriteLine("Your precision increased!\n");
                 unchangedAttributes--;
             }
             Console.WriteLine("Trying endurance.");
-            if (DiceMechanics.QuietRoll(endurance, fate, 0) < threshold)
+            if (DiceMechanics.QuietRoll(endurance, fate, this, 0) < threshold)
             {
                 endurance++;
                 Console.WriteLine("Your endurance increased!\n");
                 unchangedAttributes--;
             }
             Console.WriteLine("Trying agility.");
-            if (DiceMechanics.QuietRoll(agility, fate, 0) < threshold)
+            if (DiceMechanics.QuietRoll(agility, fate,  this, 0) < threshold)
             {
                 agility++;
                 Console.WriteLine("Your agility increased!\n");
@@ -165,12 +175,13 @@ namespace CombatTest
             {
                 Console.WriteLine($"As a consolation prize, your maximum HP increases by {unchangedAttributes}.");
                 maxHP += unchangedAttributes;
+                currentHP += unchangedAttributes;
             }
         }
         public void UpdateCharacterSheet()
         {
-            statString = DisplayStats();
-            Console.WriteLine(statString);
+
+            Console.WriteLine(DisplayStats());
         }
     }
     //generates an integer array

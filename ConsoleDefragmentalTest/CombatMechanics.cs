@@ -5,12 +5,17 @@ namespace CombatTest
 {
     public class CombatMechanics
     {
-        //rolls a number of damage dice equal to the nth triangular number 
-        //where n is the successes value
-        public int DamageRoll(int successes, int die, Func<int, int> func, Random fate)
+        //DamageRoll:
+        //Takes in the number of net successes on a resisted attack roll, the size of the user's damage die, a function from int to int, and a random object
+        //Golly that's a lot of parameters
+        //The damage die will be rolled a number of times equal to damageCounterFunc(successes)
+        //The total of these rolls will be returned to the calling function.
+        //I have been informed that a triangular number of damage rolls is too swingy
+        //This allows future proofing if the critics prove right.
+        public int DamageRoll(int successes, int die, Func<int, int> damageCounterFunc, Random fate)
         {
             int damage = 0;
-            for (int i = 1; func(successes) >= i; i++)
+            for (int i = 1; damageCounterFunc(successes) >= i; i++)
             {
                 int damageDieRoll = DiceMechanics.DieRoll(die, fate);
                 Console.Write(damageDieRoll + " ");
@@ -19,20 +24,27 @@ namespace CombatTest
             Console.WriteLine();
             return damage;
         }
+        //DealDamage:
         //damage is dealt to a target entity and is subtracted from their current HP
         public void DealDamage(Entity target, int damage)
         {
             target.currentHP -= damage;
         }
-        //attacker and defender make opposed die rolls to determine if an attack hits
+        //Attack:
+        //takes in two entities, an attacker and a defender, as well as their defensive stats
+        //AND a random object, the amount of skew the attacker used,
+        //and a ResolutionFunction with parameters for the attacker's primary stat, random object, attacker, and skew used
+        //The attacker makes a call to the ResolutionFunction
+        //Defender makes a call to StatRoll
+        //netHits is evaluated with a call to OpposedRoll between the attacker and defender
         //if attacker has more successes
         //damage is dealt proportionally
         //if not
         //damage is not dealt
-        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed, Func<int, Random, Entity, int, int> ResolutionFunction)
+        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed, Func<int, Random, Entity, int, int> AttackerResolutionFunction)
         {
             Console.WriteLine("Attacker's Results: ");
-            int attackerHits = ResolutionFunction(attackingStat, fate, attacker, skewUsed);
+            int attackerHits = AttackerResolutionFunction(attackingStat, fate, attacker, skewUsed);
             Console.ReadKey();
             Console.WriteLine("\n Defender's results: ");
             int defenderHits = DiceMechanics.StatRoll(defendingStat, fate, defender);
@@ -46,10 +58,13 @@ namespace CombatTest
                 Console.WriteLine($"The swing connects for {damageTotal} damage.");
             }
         }
+        //FightLoop:
+        //Takes in the player as a Gamestate, a Monster, and a Random object
         //this is the primary combat engine
         //the monster appears and is displayed
         //then the player has a choice of actions
-        //so far (4/30/2021): the player only has the option of bonking it over the head or bonking it over the head more precisely
+        //so far (2/13/2023): the player only has the option of bonking it over the head or bonking it over the head more precisely
+        //When the foe's HP is 0 or less, the loop ends.
         public void FightLoop(Gamestate protagonist, Monster foe, Random fate)
         {
             Console.WriteLine($"The {foe.name} approaches!");
@@ -65,6 +80,23 @@ namespace CombatTest
 
 
         }
+        //PlayerAttack:
+        //Takes in a Monster, the player as a Gamestate, a Random Object, and a ResolutionFunction.
+        //RESOLUTION FUNCTIONS:
+        //ResolutionFunctions are functions that take in an integer for the actor's currently used attribute, a Random object, the active Entity, and the skew used, and return an integer
+        //Designer intent is to have them check for a random condition attribute times, increasing the number of checks in the case of an optimal result, and returning number of successful checks
+        //KEY ATTACK STAT:
+        //The function begins with the player being given to attack heavily or precisely (keying their attack this action to EITHER power or precision)
+        //HANDLING SKEW:
+        //Once this is determined (and determined correctly), they are prompted to use up to two skew from their stack.
+        //If they attempt to use more than that or less than zero, they use zero instead.
+        //After this, the skew is deducted from their stack.
+        //The player is then given the option to skew the values upwards or downwards.
+        //Skewing downwards sets the skewUsed to its additive inverse.
+        //AFTER SKEW RESOLUTION:
+        //A printed description is given of the attack's type, and Attack is called with the player's appropriate stat, random object, player object, skew used, and resolution function.
+        //If the player reduces the monster's currentHP to 0 or less, the player wins and Victory is called, taking in the player, the monster, and the random object.
+        //If the player does not, the monster gets a turn. If the player's currentHP remains above zero, the FightLoop continues.
         private void PlayerAttack(Monster foe, Gamestate protagonist, Random fate, Func<int, Random, Entity, int, int> ResolutionFunction)
         {
             Console.WriteLine("Press h to attack heavily, or p to attack precisely");
@@ -120,12 +152,73 @@ namespace CombatTest
             else { MonsterAttack(foe, protagonist, fate, 0); }
 
         }
+        //MonsterAttack:
+        //Takes in a Monster, the Gamestate, the random object, and a skew value (generally set to zero).
+        //The foe acts, acting with rudimentary AI.
+        //GENERALLY BETTER DECISION:
+        //Two times out of three it will choise the (generally) best stat comparison.
+        //If it can put its best attribute into the defender's corresponding weakest attribute, it will do that.
+        //If its attributes match, it will instead attack the defender's weakest attribute.
+        //If it has a high attribute that matches the defender's higher attribute, it will calculate the difference between the two corresponding high attributes and the two corresponding low attributes.
+        //Then choose the one with the largest difference.
+        //If there's an oversight and not all cases are covered, it will default to a general power into endurance attack.
+        //GENERALLY WORSE DECISION:
+        //The monster attacks with its higher attribute into the defender's lower attribute, defaulting to power-> endurance in case of a tie.
+        //CONCLUSION:
+        //If the player's HP is reduced to 0 or less, the player loses.
+        //Otherwise the fight continues. 
         private void MonsterAttack(Monster foe, Gamestate protagonist, Random fate, int skew)
         {
+            int betterAttackingStat = Math.Max(foe.power, foe.precision);
+            int worseAttackingStat = Math.Min(foe.power, foe.precision);
+            int betterTargetStat = Math.Min(protagonist.agility, protagonist.endurance);
+            int worseTargetStat = Math.Min(protagonist.agility, protagonist.endurance);
             Console.WriteLine($"It is now the {foe.name}'s turn.");
-            Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+            if (DiceMechanics.DieRoll(3, fate) > 2)
+            {
+                if (betterAttackingStat == foe.power && betterTargetStat == protagonist.endurance)
+                {
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                }
+                else if (betterAttackingStat == foe.precision && betterTargetStat == protagonist.agility)
+                {
+                    Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                }
+                else if (betterAttackingStat == worseAttackingStat)
+                {
+                    Attack(foe, protagonist, betterAttackingStat, worseTargetStat, fate, 0, DiceMechanics.StatRoll);
+                }
+                else if (foe.power - protagonist.endurance > foe.precision - protagonist.agility)
+                {
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+
+                }
+                else if (foe.power - protagonist.endurance < foe.precision - protagonist.agility)
+                {
+                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0, DiceMechanics.StatRoll);
+                }
+                else { Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll); }
+            }
+            else
+            {
+                if (foe.power < foe.precision)
+                {
+                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0, DiceMechanics.StatRoll);
+                }
+                else
+                {
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                }
+            }
             if (protagonist.currentHP < 1) { Defeat(); }
         }
+        //Victory:
+        //Takes in the Gamestate and a Monster, as well as (surprise) a random.
+        //Populates the MonsterTable, a list of monsters that might be generated.
+        //Calls GainStates on the player.
+        //Generates a new monster from the MonsterTable.
+        //displays the player's new stats.
+        //Calls fightloop with the generated monster, starting a fight.
         public void Victory(Gamestate protagonist, Monster foe, Random fate)
         {
             List<Monster> MonsterTable = new List<Monster>();
@@ -145,6 +238,10 @@ namespace CombatTest
             protagonist.UpdateCharacterSheet();
             combat.FightLoop(protagonist, currentMonster, fate);
         }
+        //Defeat:
+        //Called when the player's HP hits zero.
+        //Prints a message, and hangs on input.
+        //Then quits.
         public void Defeat()
         {
             Console.WriteLine("You're out of HP, and take your final bow.\n Would you like to play again? \n Choose No or No.");
