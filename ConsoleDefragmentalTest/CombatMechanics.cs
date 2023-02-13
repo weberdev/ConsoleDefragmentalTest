@@ -41,13 +41,13 @@ namespace CombatTest
         //damage is dealt proportionally
         //if not
         //damage is not dealt
-        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed, Func<int, Random, Entity, int, int> AttackerResolutionFunction)
+        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed)
         {
             Console.WriteLine("Attacker's Results: ");
-            int attackerHits = AttackerResolutionFunction(attackingStat, fate, attacker, skewUsed);
+            int attackerHits = attacker.ResolutionFunction(attackingStat, fate, attacker, skewUsed);
             Console.ReadKey();
             Console.WriteLine("\n Defender's results: ");
-            int defenderHits = DiceMechanics.StatRoll(defendingStat, fate, defender);
+            int defenderHits = defender.ResolutionFunction(defendingStat, fate, defender, 0);
             Console.ReadKey();
             int netHits = DiceMechanics.OpposedRoll(attackerHits, defenderHits);
             if (netHits > 0)
@@ -75,7 +75,7 @@ namespace CombatTest
                 Console.WriteLine($"{protagonist.name}: HP: {protagonist.currentHP}/{protagonist.maxHP} SKEW: {protagonist.currentSkew}/{protagonist.maxSkew}");
                 Console.WriteLine($"{foe.name}: {foe.currentHP}/{foe.maxHP}");
                 Console.WriteLine("This is the demo, you may only attack.");
-                PlayerAttack(foe, protagonist, fate, CardMechanics.StatDraw);
+                PlayerAttack(foe, protagonist, fate);
             }
 
 
@@ -97,7 +97,7 @@ namespace CombatTest
         //A printed description is given of the attack's type, and Attack is called with the player's appropriate stat, random object, player object, skew used, and resolution function.
         //If the player reduces the monster's currentHP to 0 or less, the player wins and Victory is called, taking in the player, the monster, and the random object.
         //If the player does not, the monster gets a turn. If the player's currentHP remains above zero, the FightLoop continues.
-        private void PlayerAttack(Monster foe, Gamestate protagonist, Random fate, Func<int, Random, Entity, int, int> ResolutionFunction)
+        private void PlayerAttack(Monster foe, Gamestate protagonist, Random fate)
         {
             Console.WriteLine("Press h to attack heavily, or p to attack precisely");
             string actionChoice;
@@ -136,12 +136,12 @@ namespace CombatTest
             if (actionChoice == "h")
             {
                 Console.WriteLine("You swing boldly.");
-                Attack(protagonist, foe, protagonist.power, foe.endurance, fate, skewUsed, ResolutionFunction);
+                Attack(protagonist, foe, protagonist.power, foe.endurance, fate, skewUsed);
             }
             else if (actionChoice == "p")
             {
                 Console.WriteLine("You swing precisely.");
-                Attack(protagonist, foe, protagonist.precision, foe.agility, fate, skewUsed, ResolutionFunction);
+                Attack(protagonist, foe, protagonist.precision, foe.agility, fate, skewUsed);
             }
             else
             {
@@ -178,36 +178,37 @@ namespace CombatTest
             {
                 if (betterAttackingStat == foe.power && betterTargetStat == protagonist.endurance)
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
                 }
                 else if (betterAttackingStat == foe.precision && betterTargetStat == protagonist.agility)
                 {
-                    Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0);
                 }
                 else if (betterAttackingStat == worseAttackingStat)
                 {
-                    Attack(foe, protagonist, betterAttackingStat, worseTargetStat, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, betterAttackingStat, worseTargetStat, fate, 0);
                 }
                 else if (foe.power - protagonist.endurance > foe.precision - protagonist.agility)
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
 
                 }
                 else if (foe.power - protagonist.endurance < foe.precision - protagonist.agility)
                 {
-                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0);
                 }
-                else { Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll); }
+                else { 
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0); }
             }
             else
             {
                 if (foe.power < foe.precision)
                 {
-                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0);
                 }
                 else
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0, DiceMechanics.StatRoll);
+                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
                 }
             }
             if (protagonist.currentHP < 1) { Defeat(); }
@@ -222,12 +223,12 @@ namespace CombatTest
         public void Victory(Gamestate protagonist, Monster foe, Random fate)
         {
             List<Monster> MonsterTable = new List<Monster>();
-            MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3));
-            MonsterTable.Add(new Monster("Walking Chaffbeast", 20, 2, 2, 4, 4, 2));
-            MonsterTable.Add(new Monster("Gremlin Assassin", 12, 8, 8, 1, 1, 1));
-            MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3));
-            MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3));
-            MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3));
+            MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Walking Chaffbeast", 20, 2, 2, 4, 4, 2, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Gremlin Assassin", 12, 8, 8, 1, 1, 1, CardMechanics.StatDraw));
+            MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
             Console.WriteLine($"The {foe.name} is slain!");
             protagonist.GainStats(fate, 2);
             Console.ReadKey();

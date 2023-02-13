@@ -54,6 +54,7 @@ namespace CombatTest
         public int bonusRolls = 2;
         public int critMod = 0;
         public int successValue = 6;
+        public Func<int, Random, Entity, int, int> ResolutionFunction = DiceMechanics.StatRoll;
 
     }
 
@@ -61,7 +62,7 @@ namespace CombatTest
     public class Monster : Entity
     {   
         //this is a constructor
-        public Monster(string Name, int MAXHP, int PWR, int PRC, int END, int AGI, int DIE)
+        public Monster(string Name, int MAXHP, int PWR, int PRC, int END, int AGI, int DIE, Func <int, Random, Entity, int, int> resFunc)
         {
             name = Name;
             maxHP = MAXHP;
@@ -72,12 +73,13 @@ namespace CombatTest
             damageDie = DIE;
             currentHP = MAXHP;
             statString = DisplayStats();
+            ResolutionFunction = resFunc;
         }
         //this takes an existing monster template
         //and pushes it somewhere
         public Monster CopyMonster(Monster baseMonster)
         {
-            Monster thisMonster = new("Proteus", 0, 0, 0, 0, 0, 0)
+            Monster thisMonster = new("Proteus", 0, 0, 0, 0, 0, 0, DiceMechanics.StatRoll)
             {
                 name = baseMonster.name,
                 maxHP = baseMonster.maxHP,
@@ -98,12 +100,12 @@ namespace CombatTest
         public List<Monster> MonsterTable;
         public Location()
         {
-            MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3));
-            MonsterTable.Add(new Monster("Walking Chaffbeast", 20, 2, 2, 4, 4, 2));
-            MonsterTable.Add(new Monster("Gremlin Assassin", 12, 8, 8, 1, 1, 1));
-            MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3));
-            MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3));
-            MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3));
+            MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Walking Chaffbeast", 20, 2, 2, 4, 4, 2, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Gremlin Assassin", 12, 8, 8, 1, 1, 1, CardMechanics.StatDraw));
+            MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
+            MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
         }
     }
 
@@ -217,13 +219,29 @@ namespace CombatTest
         {
 
             string yourName;
+            string yourResolution;
             Random whimsOfFate = new Random();
             Console.WriteLine("Please enter your name.");
             yourName = Console.ReadLine();
+            Console.WriteLine($"Howdy, {yourName}, are you a dice thrower or a card hustler? D for dice, C for cards.");
+            yourResolution = Console.ReadLine().ToLower();
+            while(yourResolution!= "c" && yourResolution != "d")
+            {
+                Console.WriteLine("Please choose dice or cards. C or D.");
+                yourResolution = Console.ReadLine().ToLower();
+            }
             Gamestate currentState = new(yourName, 15, 4, 5, 4, 3, 4);
+            if (yourResolution == "c")
+            {
+                currentState.ResolutionFunction = CardMechanics.StatDraw;
+            }
+            else 
+            {
+                currentState.ResolutionFunction = DiceMechanics.StatRoll;
+            }
             currentState.Deck.Shuffle();
             Console.WriteLine(currentState.statString);
-            Monster currentMonster = new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3);
+            Monster currentMonster = new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll);
             CombatMechanics combat = new CombatMechanics();
             combat.FightLoop(currentState, currentMonster, whimsOfFate);
         }
