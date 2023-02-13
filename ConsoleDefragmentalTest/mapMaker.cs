@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System;
 using Random = System.Random;
 
-namespace mapMaker
+namespace ConsoleDefragmentalTest
 {
 
-    public class Map 
+    public class Map
     {
         public char[,] positions;
         public int spawnX;
@@ -31,15 +31,15 @@ namespace mapMaker
                     int roomWidth = boundedRand(64, 2, 5);
                     int roomLength = boundedRand(64, 2, 5);
                     ;
-                    for (int h = roomX - roomWidth; h < (roomX + roomWidth + 1); h++)
+                    for (int h = roomX - roomWidth; h < roomX + roomWidth + 1; h++)
                     {
-                        for (int j = roomY - roomLength; j < (roomY + roomLength + 1); j++)
+                        for (int j = roomY - roomLength; j < roomY + roomLength + 1; j++)
                         {
                             if (positions[h, j] == 'X')
                             {
                                 positions[h, j] = '.';
                             }
-                            if ((positions[h, j] == 'C') || (positions[h, j] == 'R'))
+                            if (positions[h, j] == 'C' || positions[h, j] == 'R')
                             {
                                 positions[h, j] = 'R';
                             }
@@ -70,9 +70,9 @@ namespace mapMaker
                     int roomWidth = boundedRand(64, 2, 7);
                     int roomLength = boundedRand(64, 2, 7);
                     ;
-                    for (int h = roomX - roomWidth; h < (roomX + roomWidth + 1); h++)
+                    for (int h = roomX - roomWidth; h < roomX + roomWidth + 1; h++)
                     {
-                        for (int j = roomY - roomLength; j < (roomY + roomLength + 1); j++)
+                        for (int j = roomY - roomLength; j < roomY + roomLength + 1; j++)
                         {
                             if (positions[h, j] == 'X')
                             {
@@ -127,25 +127,25 @@ namespace mapMaker
                 for (int j = 0; j < length; j++)
                 {
                     decay = EntropicDecay.Next(1, decayChance + 1);
-                    if (((i % (length - 1) == 0) || (j % (length - 1) == 0)) || (j % maxRoomSize == 0) && (i % maxRoomSize == 0))
+                    if (i % (length - 1) == 0 || j % (length - 1) == 0 || j % maxRoomSize == 0 && i % maxRoomSize == 0)
                     {
                         positions[i, j] = 'X';
                     }
-                    else if ((i % maxRoomSize == 1) && (decay == decayChance) && (j % maxRoomSize == 0))
+                    else if (i % maxRoomSize == 1 && decay == decayChance && j % maxRoomSize == 0)
                     {
                         for (int k = 0; k < 6; k++)
                         {
                             positions[i + k, j] = '.';
                         }
                     }
-                    else if ((j % maxRoomSize == 1) && (decay == decayChance) && (i % maxRoomSize == 0))
+                    else if (j % maxRoomSize == 1 && decay == decayChance && i % maxRoomSize == 0)
                     {
                         for (int k = 0; k < 6; k++)
                         {
                             positions[i, j + k] = '.';
                         }
                     }
-                    else if (((i % maxRoomSize == 0) | (j % maxRoomSize) == 0) && (decay != decayChance))
+                    else if (i % maxRoomSize == 0 | j % maxRoomSize == 0 && decay != decayChance)
                     {
                         if (positions[i, j] != '.')
                         {
@@ -162,15 +162,15 @@ namespace mapMaker
             }
             int sectionSpawnX = getSegment(maxRoomSize - 2);
             sectionSpawnX++;
-            int spawnX = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionSpawnX);
+            int spawnX = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionSpawnX;
             int sectionSpawnY = getSegment(maxRoomSize - 2);
             sectionSpawnY++;
-            int spawnY = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionSpawnY);
+            int spawnY = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionSpawnY;
             int sectionStairsX = getSegment(maxRoomSize);
-            int stairsX = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionStairsX);
+            int stairsX = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionStairsX;
             int sectionStairsY = getSegment(maxRoomSize);
-            int stairsY = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionStairsY);
-            while (((Math.Abs(sectionSpawnX - sectionStairsX) + Math.Abs(sectionSpawnY - sectionStairsY) < 8)))
+            int stairsY = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionStairsY;
+            while (Math.Abs(sectionSpawnX - sectionStairsX) + Math.Abs(sectionSpawnY - sectionStairsY) < 8)
             {
                 sectionSpawnX = getSegment(maxRoomSize - 2);
                 sectionSpawnX++;
@@ -178,34 +178,34 @@ namespace mapMaker
                 sectionSpawnY++;
                 sectionStairsY = getSegment(maxRoomSize);
                 sectionStairsX = getSegment(maxRoomSize);
-                spawnX = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionSpawnX);
-                spawnY = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionSpawnY);
-                stairsX = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionStairsX);
-                stairsY = EntropicDecay.Next(1, maxRoomSize) + (maxRoomSize * sectionStairsY);
+                spawnX = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionSpawnX;
+                spawnY = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionSpawnY;
+                stairsX = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionStairsX;
+                stairsY = EntropicDecay.Next(1, maxRoomSize) + maxRoomSize * sectionStairsY;
             }
 
             positions[spawnX, spawnY] = '@';
             positions[stairsX, stairsY] = 'S';
-            while ((sectionSpawnX != sectionStairsX) | (sectionSpawnY != sectionStairsY))
+            while (sectionSpawnX != sectionStairsX | sectionSpawnY != sectionStairsY)
             {
                 if (sectionSpawnX < sectionStairsX)
                 {
-                    positions[(maxRoomSize * sectionSpawnX) + maxRoomSize, (maxRoomSize * sectionSpawnY) + EntropicDecay.Next(1, maxRoomSize)] = 'O';
+                    positions[maxRoomSize * sectionSpawnX + maxRoomSize, maxRoomSize * sectionSpawnY + EntropicDecay.Next(1, maxRoomSize)] = 'O';
                     sectionSpawnX++;
                 }
                 else if (sectionSpawnX > sectionStairsX)
                 {
-                    positions[(maxRoomSize * sectionSpawnX), (maxRoomSize * sectionSpawnY) + EntropicDecay.Next(1, maxRoomSize)] = 'O';
+                    positions[maxRoomSize * sectionSpawnX, maxRoomSize * sectionSpawnY + EntropicDecay.Next(1, maxRoomSize)] = 'O';
                     sectionSpawnX--;
                 }
                 if (sectionSpawnY < sectionStairsY)
                 {
-                    positions[(maxRoomSize * sectionSpawnX) + EntropicDecay.Next(1, maxRoomSize), (maxRoomSize * sectionSpawnY) + maxRoomSize] = 'O';
+                    positions[maxRoomSize * sectionSpawnX + EntropicDecay.Next(1, maxRoomSize), maxRoomSize * sectionSpawnY + maxRoomSize] = 'O';
                     sectionSpawnY++;
                 }
                 else if (sectionSpawnY > sectionStairsY)
                 {
-                    positions[(maxRoomSize * sectionSpawnX) + EntropicDecay.Next(1, maxRoomSize), (maxRoomSize * sectionSpawnY)] = 'O';
+                    positions[maxRoomSize * sectionSpawnX + EntropicDecay.Next(1, maxRoomSize), maxRoomSize * sectionSpawnY] = 'O';
                     sectionSpawnY--;
                 }
             }
@@ -219,11 +219,11 @@ namespace mapMaker
             int length = lengthRoot * lengthRoot;
             Random dartsAtAWall = new Random();
 
-            spawnX = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
-            spawnY = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
+            spawnX = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
+            spawnY = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
             positions = new char[length, length];
-            stairsX = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
-            stairsY = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
+            stairsX = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
+            stairsY = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
             for (int i = 0; i < length; i++)
             {
                 for (int j = 0; j < length; j++)
@@ -231,7 +231,7 @@ namespace mapMaker
                     positions[i, j] = 'X';
                 }
             }
-            while ((Math.Abs(spawnX - stairsX) + Math.Abs(spawnY - stairsY) < 45))
+            while (Math.Abs(spawnX - stairsX) + Math.Abs(spawnY - stairsY) < 45)
             {
                 stairsX = dartsAtAWall.Next(5, length - 5);
                 stairsY = dartsAtAWall.Next(5, length - 5);
@@ -253,7 +253,7 @@ namespace mapMaker
             }
             positions[spawnX, spawnY] = '@';
             positions[stairsX, stairsY] = 'S';
-            
+
             int numberOfRooms = dartsAtAWall.Next(length / 2, length);
             int priorRoomX = spawnX;
             int priorRoomY = spawnY;
@@ -263,20 +263,20 @@ namespace mapMaker
             {
                 if (i % 2 == 0)
                 {
-                    int roomX = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
+                    int roomX = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
                     int roomY = priorRoomY;
-                    int roomWidth = dartsAtAWall.Next(2, (lengthRoot/2));
-                    int roomLength = dartsAtAWall.Next(2, (lengthRoot / 2));
+                    int roomWidth = dartsAtAWall.Next(2, lengthRoot / 2);
+                    int roomLength = dartsAtAWall.Next(2, lengthRoot / 2);
                     ;
-                    for (int h = roomX - roomWidth; h < (roomX + roomWidth + 1); h++)
+                    for (int h = roomX - roomWidth; h < roomX + roomWidth + 1; h++)
                     {
-                        for (int j = roomY - roomLength; j < (roomY + roomLength + 1); j++)
+                        for (int j = roomY - roomLength; j < roomY + roomLength + 1; j++)
                         {
                             if (positions[h, j] == 'X')
                             {
                                 positions[h, j] = '.';
                             }
-                            if ((positions[h, j] == 'C') || (positions[h, j] == 'R'))
+                            if (positions[h, j] == 'C' || positions[h, j] == 'R')
                             {
                                 positions[h, j] = 'R';
                             }
@@ -303,13 +303,13 @@ namespace mapMaker
                 else
                 {
                     int roomX = priorRoomX;
-                    int roomY = dartsAtAWall.Next(((lengthRoot / 2) + 1), length - ((lengthRoot / 2) + 1));
-                    int roomWidth = dartsAtAWall.Next(2, (lengthRoot/2));
-                    int roomLength = dartsAtAWall.Next(2, (lengthRoot / 2));
+                    int roomY = dartsAtAWall.Next(lengthRoot / 2 + 1, length - (lengthRoot / 2 + 1));
+                    int roomWidth = dartsAtAWall.Next(2, lengthRoot / 2);
+                    int roomLength = dartsAtAWall.Next(2, lengthRoot / 2);
                     ;
-                    for (int h = roomX - roomWidth; h < (roomX + roomWidth + 1); h++)
+                    for (int h = roomX - roomWidth; h < roomX + roomWidth + 1; h++)
                     {
-                        for (int j = roomY - roomLength; j < (roomY + roomLength + 1); j++)
+                        for (int j = roomY - roomLength; j < roomY + roomLength + 1; j++)
                         {
                             if (positions[h, j] == 'X')
                             {
@@ -353,7 +353,7 @@ namespace mapMaker
             int stairsX = 2 * rand.Next(1, halfSideLength - 1);
             int stairsY = 2 * rand.Next(1, halfSideLength - 1);
             positions = new char[sideLength, sideLength];
-            while ((Math.Abs(spawnX - stairsX) + Math.Abs(spawnY - stairsY) < 45))
+            while (Math.Abs(spawnX - stairsX) + Math.Abs(spawnY - stairsY) < 45)
             {
                 stairsX = 2 * rand.Next(1, halfSideLength - 1);
                 stairsY = 2 * rand.Next(1, halfSideLength - 1);
@@ -374,7 +374,7 @@ namespace mapMaker
             {
                 if (i % 2 == 0)
                 {
-                    int roomX = 2 * rand.Next((sideRoot / 2), halfSideLength - ((sideRoot / 2)));
+                    int roomX = 2 * rand.Next(sideRoot / 2, halfSideLength - sideRoot / 2);
                     int roomY = priorRoomY;
                     smaller = Math.Min(roomX, priorRoomX);
                     larger = Math.Max(roomX, priorRoomX);
@@ -398,7 +398,7 @@ namespace mapMaker
                 else
                 {
                     int roomX = priorRoomX;
-                    int roomY = 2 * rand.Next(((sideRoot / 2)), halfSideLength - ((sideRoot / 2)));
+                    int roomY = 2 * rand.Next(sideRoot / 2, halfSideLength - sideRoot / 2);
 
                     smaller = Math.Min(roomY, priorRoomY);
                     larger = Math.Max(roomY, priorRoomY);
@@ -429,19 +429,19 @@ namespace mapMaker
             {
                 for (int j = 0; j < n; j++)
                 {
-                    if ((array[i, j] == '@') || (array[i, j] == 'S'))
+                    if (array[i, j] == '@' || array[i, j] == 'S')
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.Write(array[i, j] + " ");
                         Console.ResetColor();
                     }
-                    else if ((array[i, j] != 'X') && (array[i, j] != '.'))
+                    else if (array[i, j] != 'X' && array[i, j] != '.')
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write(array[i, j] + " ");
                         Console.ResetColor();
                     }
-                    else if ((array[i, j] == '.'))
+                    else if (array[i, j] == '.')
                     {
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.Write(array[i, j] + " ");
