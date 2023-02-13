@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ConsoleDefragmentalTest
+namespace CombatTest
 {
     public class CombatMechanics
     {
@@ -12,10 +12,11 @@ namespace ConsoleDefragmentalTest
             int damage = 0;
             for (int i = 1; func(successes) >= i; i++)
             {
-
                 int damageDieRoll = DiceMechanics.DieRoll(die, fate);
+                Console.Write(damageDieRoll + " ");
                 damage += damageDieRoll;
             }
+            Console.WriteLine();
             return damage;
         }
         //damage is dealt to a target entity and is subtracted from their current HP
@@ -33,7 +34,7 @@ namespace ConsoleDefragmentalTest
             Console.WriteLine("Attacker's Results: ");
             int attackerHits = ResolutionFunction(attackingStat, fate, attacker, skewUsed);
             Console.ReadKey();
-            Console.WriteLine("Defender's results: ");
+            Console.WriteLine("\n Defender's results: ");
             int defenderHits = DiceMechanics.StatRoll(defendingStat, fate, defender);
             Console.ReadKey();
             int netHits = DiceMechanics.OpposedRoll(attackerHits, defenderHits);
@@ -60,7 +61,6 @@ namespace ConsoleDefragmentalTest
                 Console.WriteLine($"{foe.name}: {foe.currentHP}/{foe.maxHP}");
                 Console.WriteLine("This is the demo, you may only attack.");
                 PlayerAttack(foe, protagonist, fate, CardMechanics.StatDraw);
-
             }
 
 

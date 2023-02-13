@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Xyaneon.Games.Cards;
 using Xyaneon.Games.Cards.StandardPlayingCards;
 
-namespace ConsoleDefragmentalTest
+namespace CombatTest
 {
     //all functions for dice chucking are contained here
     public class DiceMechanics
@@ -68,7 +68,7 @@ namespace ConsoleDefragmentalTest
         //fate is the default random object
         public static int DieRoll(int die, Random fate)
         {
-            int roll = fate.Next(die + 1);
+            int roll = fate.Next(1, die+1);
             return roll;
         }
         //subtraction, but as a method
@@ -220,18 +220,21 @@ namespace ConsoleDefragmentalTest
         public static int StatDraw(int totalStat, Random rand, Entity activeEntity, int skew)
         {
             int total = 0;
-            for (int i = 0; i < totalStat; i++)
+            for (int i = 0-skew; i < totalStat; i++)
             {
                 if (activeEntity.Deck.IsEmpty)
                 {
                     foreach (StandardPlayingCard discardedCard in activeEntity.Discard)
                     {
+                        Console.WriteLine("Reshuffling. All missing HP restored.");
                         activeEntity.Deck.PlaceOnTop(discardedCard);
                         activeEntity.Discard.Remove(discardedCard);
+                        activeEntity.currentHP = activeEntity.maxHP;
                     }
                     activeEntity.Deck.Shuffle();
                 }
                 StandardPlayingCard currCard = activeEntity.Deck.Draw();
+                activeEntity.Discard.Add(currCard);
                 //There is temptation to add skew to every i adjustment here, but that seems unreasonably punishing
                 //It would be desirable to implement a consequence for skew in this function, however.
                 int cardRank = RankToInt(currCard.Rank);

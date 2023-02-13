@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using Random = System.Random;
 
-namespace ConsoleDefragmentalTest
+namespace CombatTest
 {
 
     public class Map

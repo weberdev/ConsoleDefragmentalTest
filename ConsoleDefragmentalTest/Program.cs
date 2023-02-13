@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Xyaneon.Games.Cards;
 using Xyaneon.Games.Cards.StandardPlayingCards;
 
-namespace ConsoleDefragmentalTest
+namespace CombatTest
 {
     //Entity is the base class for creatures involved in combat
     //weirdly enough, also the gamestate
