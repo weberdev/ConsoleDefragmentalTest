@@ -1,10 +1,88 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace CombatTest
 {
     public class CombatMechanics
     {
+        //EndOfTurnForIndividual:
+        //As a matter of style, I really like automating everything I possibly can.
+        //Thus, EndOfTurn is a call to EndOfTurnForIndividual for each participant
+        //Theoretically this might be beneficial to other people down the road.
+        //That other person could even be me.
+        //This is called by EndOfTurn
+        //Iterates through the input entity's status effects and applies them before removing them from the list.
+        //If there are effects that have a counter, they are put on nextEndOfTurnStatusEffects.
+        //When EndOfTurnStatusEffects is empty, all elements of NextEndOfTurnStatusEffects are added to EndOfTurnStatusEffects
+        //That list is then cleared.
+        void EndOfTurnForIndividual(Entity currentEntity)
+        {
+            foreach (StatusEffect activeEffect in currentEntity.EndOfTurnStatusEffects)
+            {
+                activeEffect.statusName(currentEntity, activeEffect.statusCounter);
+                currentEntity.NextEndOfTurnStatusEffects.Remove(activeEffect);
+            }
+            foreach(StatusEffect inactiveEffect in currentEntity.NextEndOfTurnStatusEffects)
+            {
+                currentEntity.EndOfTurnStatusEffects.Add(inactiveEffect);
+            }
+            currentEntity.NextEndOfTurnStatusEffects.Clear();
+            currentEntity.EndOfTurnStatusEffects= currentEntity.MergeStatusEffects(currentEntity.EndOfTurnStatusEffects);
+        }
+        //EndOfTurn:
+        //Called at the end of a turn cycle. Calls EndOfTurnForIndividual on the player and foe.
+        //Checks for death.
+        //As before, if player.currentHP < 0 calls Defeat.
+        //THEN, if foe.currentHP < 0 calls Victory.
+        void EndOfTurn(Gamestate player, Monster foe)
+        {
+            EndOfTurnForIndividual(player);
+            EndOfTurnForIndividual(foe);
+            if(player.currentHP< 0)
+            {
+                Defeat();
+            }
+            else if(foe.currentHP< 0)
+            {
+                Random rng = new Random();
+                Victory(player, foe, rng);
+            }
+        }
+        void ApplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
+            currentEntity.NextEndOfTurnStatusEffects.Add(currentEffect);
+        }
+        //Bleed:
+        //A simple, easy bleed function.
+        //No, seriously.
+        //If bleedCounter <= 3, the bleed will slow and eventually stop.
+        //If bleedCounter > 3, the speed of the bleed will increase.
+        //This is vaguely realistic.
+        void Bleed(Entity bleedingEntity, int bleedCounter)
+        {
+            int breakpoint = 3;
+            DealDamage(bleedingEntity, bleedCounter);
+            int nextBleed = (int)Math.Sqrt((bleedCounter ^ 2)-(breakpoint^2+1));
+            if (nextBleed > 0)
+            {
+                StatusEffect BleedObject = new StatusEffect("Bleed", Bleed, nextBleed);
+                ApplyStatusEffect(bleedingEntity,BleedObject);
+            }
+        }
+        //Poison:
+        //Not an atypical poison mechanic.
+        //Poison deals damage.
+        //Ticks down.
+        void Poison(Entity poisonedEntity, int poisonCounter)
+        {
+            DealDamage(poisonedEntity, poisonCounter);
+            if (poisonCounter > 1)
+            {
+                StatusEffect PoisonObject = new StatusEffect("Poison", Poison, poisonCounter- 1);
+                ApplyStatusEffect(poisonedEntity, PoisonObject);
+            }
+        }
+
         //DamageRoll:
         //Takes in the number of net successes on a resisted attack roll, the size of the user's damage die, a function from int to int, and a random object
         //Golly that's a lot of parameters
@@ -212,6 +290,7 @@ namespace CombatTest
                 }
             }
             if (protagonist.currentHP < 1) { Defeat(); }
+            EndOfTurn(protagonist, foe);
         }
         //Victory:
         //Takes in the Gamestate and a Monster, as well as (surprise) a random.

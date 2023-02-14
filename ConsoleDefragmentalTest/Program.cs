@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xyaneon.Games.Cards;
 using Xyaneon.Games.Cards.StandardPlayingCards;
 
@@ -12,6 +13,31 @@ namespace CombatTest
         Precision = 0,
         Endurance = 0,
         Agility = 0
+    }
+
+    //StatusEffect:
+    //Class that contains a void function that takes in an entity and an integer, and a counter
+    //The class is held on a list that is part of the entity class, and a
+    public class StatusEffect
+    {
+        public string Name;
+        public Action<Entity, int> statusName;
+        public int statusCounter;
+        public StatusEffect(string objectName, Action<Entity, int> statusName, int statusCounter)
+        {
+            this.Name = objectName;
+            this.statusName = statusName;
+            this.statusCounter = statusCounter;
+        }
+        public int CompareTo(StatusEffect compareEffect)
+        {
+            // A null value means that this object is greater.
+            if (compareEffect == null)
+                return 1;
+
+            else
+                return this.Name.CompareTo(compareEffect.Name);
+        }
     }
     //Entity is the base class for creatures involved in combat
     //weirdly enough, also the gamestate
@@ -55,6 +81,32 @@ namespace CombatTest
         public int critMod = 0;
         public int successValue = 6;
         public Func<int, Random, Entity, int, int> ResolutionFunction = DiceMechanics.StatRoll;
+        public List<StatusEffect> EndOfTurnStatusEffects = new();
+        public List<StatusEffect> NextEndOfTurnStatusEffects = new();
+        //MergeStatusEffects:
+        //Takes an a list of status effects as input- this list can contain duplicates and can be unsorted.
+        //Sorts them.
+        //Creates a new empty list to receive values.
+        //Iterates through the freshly sorted list.
+        //If the name of a status effect is shared between two adjacent values, the counter of the current one to the counter of the following one.
+        //If not, the current effect is the last one of its type in the list. Knowing that that is such, it will have been given the counter values of all preceding elments.
+        //Therefore, it has the sum total of all status effects, and can be pushed to the merged list.
+        public List<StatusEffect> MergeStatusEffects(List<StatusEffect> unmergedList)
+        {
+            unmergedList.Sort();
+            List<StatusEffect> mergedList = new();
+            for (int i = 0; i < unmergedList.Count; i++)
+            {
+                if (unmergedList[i].Name == unmergedList[i + 1].Name)
+                {
+                    unmergedList[i + 1].statusCounter += unmergedList[i].statusCounter;
+                }
+                else {
+                    mergedList.Add(unmergedList[i]); 
+                }
+            }
+            return mergedList;
+        }
 
     }
 
