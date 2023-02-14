@@ -14,7 +14,14 @@ namespace CombatTest
         Endurance = 0,
         Agility = 0
     }
-
+    //Consumable:
+    //Class for items that are single use.
+    //Stored in an array in Gamestate.
+    public class Consumable
+    {
+        public string Name;
+        public Action<Entity> ConsumableEffect;
+    }
     //StatusEffect:
     //Class that contains a void function that takes in an entity and an integer, and a counter
     //The class is held on a list that is part of the entity class, and a
@@ -186,6 +193,7 @@ namespace CombatTest
             bool isLookingRight;
             statString = DisplayStats();
             int[][] map;
+            Consumable[] ConsumableInventory; 
         }
         //GainStats:
         //whenever the player would gain stats, this function is called
