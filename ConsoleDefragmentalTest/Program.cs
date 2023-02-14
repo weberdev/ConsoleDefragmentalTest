@@ -22,6 +22,8 @@ namespace CombatTest
         public string Name;
         public Action<Entity> ConsumableEffect;
     }
+
+
     //StatusEffect:
     //Class that contains a void function that takes in an entity and an integer, and a counter
     //The class is held on a list that is part of the entity class, and a
@@ -90,6 +92,7 @@ namespace CombatTest
         public Func<int, Random, Entity, int, int> ResolutionFunction = DiceMechanics.StatRoll;
         public List<StatusEffect> EndOfTurnStatusEffects = new();
         public List<StatusEffect> NextEndOfTurnStatusEffects = new();
+        public int threshold = 2;
         //MergeStatusEffects:
         //Takes an a list of status effects as input- this list can contain duplicates and can be unsorted.
         //Sorts them.
@@ -157,6 +160,8 @@ namespace CombatTest
     public class Location
     {
         public List<Monster> MonsterTable;
+        public List<Relic> RelicTable;
+        
         public Location()
         {
             MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll));
@@ -165,6 +170,7 @@ namespace CombatTest
             MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
+            RelicTable.Add(new Relic("Protean Symbiote", Relic.InflictProteanism, Relic.IncreaseThreshold));
         }
     }
 
@@ -193,7 +199,8 @@ namespace CombatTest
             bool isLookingRight;
             statString = DisplayStats();
             int[][] map;
-            Consumable[] ConsumableInventory; 
+            Consumable[] ConsumableInventory;
+            Queue<Relic> RelicsHeld;
         }
         //GainStats:
         //whenever the player would gain stats, this function is called
@@ -302,8 +309,7 @@ namespace CombatTest
             currentState.Deck.Shuffle();
             Console.WriteLine(currentState.statString);
             Monster currentMonster = new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll);
-            CombatMechanics combat = new CombatMechanics();
-            combat.FightLoop(currentState, currentMonster, whimsOfFate);
+            CombatMechanics.FightLoop(currentState, currentMonster, whimsOfFate);
         }
     }
 }

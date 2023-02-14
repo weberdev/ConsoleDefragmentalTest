@@ -8,6 +8,15 @@ namespace CombatTest
     //all functions for dice chucking are contained here
     public class DiceMechanics
     {
+        //Event Handlers here:
+        public delegate void OpposedRollEventHandler(Entity attacker, Entity Defender);
+        public static event OpposedRollEventHandler OpposedRollNegativeEvent;
+        public delegate void PlayerHitHandler();
+        public static event PlayerHitHandler PlayerHitEvent;
+        public delegate void dieRollIsOneEventHandler();
+        public static event dieRollIsOneEventHandler DieRollIsOneEvent;
+        public delegate void PlayerIsAttackedHandler();
+        public static event PlayerIsAttackedHandler PlayerIsAttackedEvent;
         //AttemptASpell:
         //Interactive
         //Inspiration: Spellcasting in Vermintide, push your luck dice games of all flavors
@@ -101,9 +110,17 @@ namespace CombatTest
         //OpposedRoll:
         //subtraction, but as a method
         //Used specifically for code clarity reasons.
-        public static int OpposedRoll(int attacker, int defender)
+        public static int OpposedRoll(int attacker, int defender, Entity AttackingEntity, Entity DefendingEntity)
         {
-            return attacker - defender;
+            int result = attacker - defender;
+            if (result < 0)
+            {
+                if (OpposedRollNegativeEvent != null)
+                {
+                    OpposedRollNegativeEvent(AttackingEntity, DefendingEntity);
+                }
+            }
+            return result;
         }
         //TriangularNumber:
         //generates the nth triangular number for an input integer n

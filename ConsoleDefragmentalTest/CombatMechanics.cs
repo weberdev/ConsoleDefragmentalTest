@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace CombatTest
 {
-    public class CombatMechanics
+    public static class CombatMechanics
     {
         //EndOfTurnForIndividual:
         //As a matter of style, I really like automating everything I possibly can.
@@ -16,7 +16,7 @@ namespace CombatTest
         //If there are effects that have a counter, they are put on nextEndOfTurnStatusEffects.
         //When EndOfTurnStatusEffects is empty, all elements of NextEndOfTurnStatusEffects are added to EndOfTurnStatusEffects
         //That list is then cleared.
-        void EndOfTurnForIndividual(Entity currentEntity)
+        public static void EndOfTurnForIndividual(Entity currentEntity)
         {
             foreach (StatusEffect activeEffect in currentEntity.EndOfTurnStatusEffects)
             {
@@ -35,7 +35,7 @@ namespace CombatTest
         //Checks for death.
         //As before, if player.currentHP < 0 calls Defeat.
         //THEN, if foe.currentHP < 0 calls Victory.
-        void EndOfTurn(Gamestate player, Monster foe)
+        public static void EndOfTurn(Gamestate player, Monster foe)
         {
             EndOfTurnForIndividual(player);
             EndOfTurnForIndividual(foe);
@@ -49,7 +49,7 @@ namespace CombatTest
                 Victory(player, foe, rng);
             }
         }
-        void ApplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
+        public static void ApplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
             currentEntity.NextEndOfTurnStatusEffects.Add(currentEffect);
         }
         //Bleed:
@@ -58,7 +58,7 @@ namespace CombatTest
         //If bleedCounter <= 3, the bleed will slow and eventually stop.
         //If bleedCounter > 3, the speed of the bleed will increase.
         //This is vaguely realistic.
-        void Bleed(Entity bleedingEntity, int bleedCounter)
+        public static void Bleed(Entity bleedingEntity, int bleedCounter)
         {
             int breakpoint = 3;
             DealDamage(bleedingEntity, bleedCounter);
@@ -73,7 +73,7 @@ namespace CombatTest
         //Not an atypical poison mechanic.
         //Poison deals damage.
         //Ticks down.
-        void Poison(Entity poisonedEntity, int poisonCounter)
+        public static void Poison(Entity poisonedEntity, int poisonCounter)
         {
             DealDamage(poisonedEntity, poisonCounter);
             if (poisonCounter > 1)
@@ -81,6 +81,15 @@ namespace CombatTest
                 StatusEffect PoisonObject = new StatusEffect("Poison", Poison, poisonCounter- 1);
                 ApplyStatusEffect(poisonedEntity, PoisonObject);
             }
+        }
+        public static void LocalizedProteanism(Entity proteanEntity, int proteanIntegerForTypeChecking) {
+            int currentStat = proteanEntity.power;
+            proteanEntity.power = proteanEntity.agility;
+            proteanEntity.agility = proteanEntity.endurance;
+            proteanEntity.endurance = proteanEntity.precision;
+            proteanEntity.precision = currentStat;
+            StatusEffect ProteanObject = new StatusEffect("Localized Proteanism", LocalizedProteanism, proteanIntegerForTypeChecking);
+            ApplyStatusEffect(proteanEntity, ProteanObject);
         }
 
         //DamageRoll:
@@ -90,7 +99,7 @@ namespace CombatTest
         //The total of these rolls will be returned to the calling function.
         //I have been informed that a triangular number of damage rolls is too swingy
         //This allows future proofing if the critics prove right.
-        public int DamageRoll(int successes, int die, Func<int, int> damageCounterFunc, Random fate)
+        public static int DamageRoll(int successes, int die, Func<int, int> damageCounterFunc, Random fate)
         {
             int damage = 0;
             for (int i = 1; damageCounterFunc(successes) >= i; i++)
@@ -104,7 +113,7 @@ namespace CombatTest
         }
         //DealDamage:
         //damage is dealt to a target entity and is subtracted from their current HP
-        public void DealDamage(Entity target, int damage)
+        public static void DealDamage(Entity target, int damage)
         {
             target.currentHP -= damage;
         }
@@ -119,7 +128,7 @@ namespace CombatTest
         //damage is dealt proportionally
         //if not
         //damage is not dealt
-        public void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed)
+        public static void Attack(Entity attacker, Entity defender, int attackingStat, int defendingStat, Random fate, int skewUsed)
         {
             Console.WriteLine("Attacker's Results: ");
             int attackerHits = attacker.ResolutionFunction(attackingStat, fate, attacker, skewUsed);
@@ -143,7 +152,7 @@ namespace CombatTest
         //then the player has a choice of actions
         //so far (2/13/2023): the player only has the option of bonking it over the head or bonking it over the head more precisely
         //When the foe's HP is 0 or less, the loop ends.
-        public void FightLoop(Gamestate protagonist, Monster foe, Random fate)
+        public static void FightLoop(Gamestate protagonist, Monster foe, Random fate)
         {
             Console.WriteLine($"The {foe.name} approaches!");
             string statBlock = foe.statString;
@@ -175,7 +184,7 @@ namespace CombatTest
         //A printed description is given of the attack's type, and Attack is called with the player's appropriate stat, random object, player object, skew used, and resolution function.
         //If the player reduces the monster's currentHP to 0 or less, the player wins and Victory is called, taking in the player, the monster, and the random object.
         //If the player does not, the monster gets a turn. If the player's currentHP remains above zero, the FightLoop continues.
-        private void PlayerAttack(Monster foe, Gamestate protagonist, Random fate)
+        private static void PlayerAttack(Monster foe, Gamestate protagonist, Random fate)
         {
             Console.WriteLine("Press h to attack heavily, or p to attack precisely");
             string actionChoice;
@@ -245,7 +254,7 @@ namespace CombatTest
         //CONCLUSION:
         //If the player's HP is reduced to 0 or less, the player loses.
         //Otherwise the fight continues. 
-        private void MonsterAttack(Monster foe, Gamestate protagonist, Random fate, int skew)
+        private static void MonsterAttack(Monster foe, Gamestate protagonist, Random fate, int skew)
         {
             int betterAttackingStat = Math.Max(foe.power, foe.precision);
             int worseAttackingStat = Math.Min(foe.power, foe.precision);
@@ -299,7 +308,7 @@ namespace CombatTest
         //Generates a new monster from the MonsterTable.
         //displays the player's new stats.
         //Calls fightloop with the generated monster, starting a fight.
-        public void Victory(Gamestate protagonist, Monster foe, Random fate)
+        public static void Victory(Gamestate protagonist, Monster foe, Random fate)
         {
             List<Monster> MonsterTable = new List<Monster>();
             MonsterTable.Add(new Monster("Hardwired Vargoblin", 8, 3, 3, 2, 4, 3, DiceMechanics.StatRoll));
@@ -309,20 +318,19 @@ namespace CombatTest
             MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
             Console.WriteLine($"The {foe.name} is slain!");
-            protagonist.GainStats(fate, 2);
+            protagonist.GainStats(fate, protagonist.threshold);
             Console.ReadKey();
             int listLength = MonsterTable.Count;
             Monster currentMonster = MonsterTable[fate.Next(listLength)];
             currentMonster = currentMonster.CopyMonster(currentMonster);
-            CombatMechanics combat = new CombatMechanics();
             protagonist.UpdateCharacterSheet();
-            combat.FightLoop(protagonist, currentMonster, fate);
+            FightLoop(protagonist, currentMonster, fate);
         }
         //Defeat:
         //Called when the player's HP hits zero.
         //Prints a message, and hangs on input.
         //Then quits.
-        public void Defeat()
+        public static void Defeat()
         {
             Console.WriteLine("You're out of HP, and take your final bow.\n Would you like to play again? \n Choose No or No.");
             Console.ReadKey();
