@@ -136,7 +136,7 @@ namespace CombatTest
             Console.WriteLine("\n Defender's results: ");
             int defenderHits = defender.ResolutionFunction(defendingStat, fate, defender, 0);
             Console.ReadKey();
-            int netHits = DiceMechanics.OpposedRoll(attackerHits, defenderHits);
+            int netHits = DiceMechanics.OpposedRoll(attackerHits, defenderHits, attacker, defender);
             if (netHits > 0)
             {
                 Console.WriteLine($"{netHits} more successes!");

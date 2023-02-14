@@ -9,20 +9,20 @@ namespace CombatTest
     public class Relic
     {
         public string Name;
-        public Action<Entity> RelicEffect;
         public Action<Entity> OnPickup;
         List<Relic> RelicList;
         List<Relic> DefaultRelicList()
         {
             List<Relic> DefaultRelicList = new List<Relic>();
-            DefaultRelicList.Add(new Relic("Protean Symbiote", InflictProteanism, IncreaseThreshold));
-            DefaultRelicList.Add(new Relic("Bullfighter's Capote", NothingOnActivation, AddRedCapote));
+            DefaultRelicList.Add(new Relic("Protean Symbiote", InflictProteanism));
+            DefaultRelicList.Add(new Relic("Bullfighter's Capote", AddRedCapote));
+            DefaultRelicList.Add(new Relic("Stabilizing Field", StabilizingField));
+            DefaultRelicList.Add(new Relic("Eye of the Ophidian Cyclops", AddOphidianCyclops));
             return DefaultRelicList;
         }
-        public Relic(string name, Action<Entity> relicEffect, Action<Entity> onPickup)
+        public Relic(string name, Action<Entity> onPickup)
         {
             Name = name;
-            RelicEffect = relicEffect;
             OnPickup = onPickup;
         }
         //NothingOnPickup:
@@ -30,7 +30,8 @@ namespace CombatTest
         {
             Console.WriteLine("This relic has not affected you. Yet.");
         }
-        //NothingOnActivation
+        //NothingOnActivation:
+        //Does nothing. This is mainly implemented to ensure that the relic objects work smoothly in general.
         public static void NothingOnActivation(Entity target)
         {
 
@@ -46,8 +47,9 @@ namespace CombatTest
         //Second effect of Protean Symbiote.
         //Increases the player's threshold by one.
         //This allows attributes to grow more easily.
-        public static  void IncreaseThreshold(Entity target)
+        public static void ProteanSymbiote(Entity target)
         {
+            CombatMechanics.LocalizedProteanism(target, 1);
             target.threshold++;
         }
         //AddRedCapote:
@@ -65,6 +67,28 @@ namespace CombatTest
             Random rng = new Random();
             CombatMechanics.Attack(dodging, missedAttacker, dodging.precision, missedAttacker.agility, rng, 0);
         }
+        //StabilizingField
+        //Adjusts the player's successValue downward (making it easier) and bonusRolls Downward (fewer generated
+        public static void StabilizingField(Entity target)
+        {
+            target.successValue -= 1;
+            target.bonusRolls-= 1;
+        }
+        //AddOphidianCyclops:
+        //If a die roll is a one, explode the die, take one damage.
+        public static void AddOphidianCyclops(Entity target)
+        {
+            DiceMechanics.DieRollIsOneEvent += OphidianCyclops;
+        }
+
+        //OphidianCyclops:
+        //If a die roll is a one, get an additional roll, take one damage.
+        public static int OphidianCyclops(Entity player)
+        {
+            player.currentHP-= 1;
+            return 1;
+        }
+        
       
     }
 }

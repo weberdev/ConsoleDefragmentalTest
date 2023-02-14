@@ -85,6 +85,7 @@ namespace CombatTest
             string stats = $"{name} \n {currentHP}/{maxHP}HP\n Power: {power}   Precision: {precision} \n Endurance: {endurance}   Agility {agility}";
             return stats;
         }
+        public Random rng = new Random();
         public int statDie = 8;
         public int bonusRolls = 2;
         public int critMod = 0;
@@ -170,7 +171,7 @@ namespace CombatTest
             MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
-            RelicTable.Add(new Relic("Protean Symbiote", Relic.InflictProteanism, Relic.IncreaseThreshold));
+            RelicTable.Add(new Relic("Protean Symbiote", Relic.InflictProteanism));
         }
     }
 

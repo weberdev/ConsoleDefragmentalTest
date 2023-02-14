@@ -13,7 +13,7 @@ namespace CombatTest
         public static event OpposedRollEventHandler OpposedRollNegativeEvent;
         public delegate void PlayerHitHandler();
         public static event PlayerHitHandler PlayerHitEvent;
-        public delegate void dieRollIsOneEventHandler();
+        public delegate int dieRollIsOneEventHandler(Entity player);
         public static event dieRollIsOneEventHandler DieRollIsOneEvent;
         public delegate void PlayerIsAttackedHandler();
         public static event PlayerIsAttackedHandler PlayerIsAttackedEvent;
@@ -164,6 +164,14 @@ namespace CombatTest
                     successes++;
                     Console.Write("!");
                 }
+                else if (currentRoll == 1)
+                {
+                    if (DieRollIsOneEvent != null && (activeEntity is Gamestate))
+                        {
+                            i-=DieRollIsOneEvent(activeEntity);
+                        }
+                    }
+                
                 else
                 {
                     Console.Write(".");
