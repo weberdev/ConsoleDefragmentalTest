@@ -49,14 +49,24 @@ namespace CombatTest
                 Victory(player, foe, rng);
             }
         }
-        public static void ApplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
+        //ApplyStatusEffect
+        //Take an entity and a StatusEffectObject
+        //Appends the StatusEffect to the entity's EndOfTurnStatusEffects list
+        public static void ApplyStatusEffect(Entity currentEntity, StatusEffect currentEffect)
+        {
+            currentEntity.EndOfTurnStatusEffects.Add(currentEffect);
+        }
+        //ReapplyStatusEffect
+        //Takes an entity and a statusEffect object.
+        //appends the statusEffect to the NextEndOfTurnStatus list.
+        public static void ReapplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
             currentEntity.NextEndOfTurnStatusEffects.Add(currentEffect);
         }
         //Bleed:
         //A simple, easy bleed function.
         //No, seriously.
-        //If bleedCounter <= 3, the bleed will slow and eventually stop.
-        //If bleedCounter > 3, the speed of the bleed will increase.
+        //breakpoint is the value above which the bleed will worsen.
+        //If the bleedCounter value is equal or less than breakpoint, the bleed will inevitably recede.
         //This is vaguely realistic.
         public static void Bleed(Entity bleedingEntity, int bleedCounter)
         {
@@ -66,7 +76,7 @@ namespace CombatTest
             if (nextBleed > 0)
             {
                 StatusEffect BleedObject = new StatusEffect("Bleed", Bleed, nextBleed);
-                ApplyStatusEffect(bleedingEntity,BleedObject);
+                ReapplyStatusEffect(bleedingEntity,BleedObject);
             }
         }
         //Poison:
@@ -79,7 +89,7 @@ namespace CombatTest
             if (poisonCounter > 1)
             {
                 StatusEffect PoisonObject = new StatusEffect("Poison", Poison, poisonCounter- 1);
-                ApplyStatusEffect(poisonedEntity, PoisonObject);
+                ReapplyStatusEffect(poisonedEntity, PoisonObject);
             }
         }
         public static void LocalizedProteanism(Entity proteanEntity, int proteanIntegerForTypeChecking) {
@@ -89,7 +99,7 @@ namespace CombatTest
             proteanEntity.endurance = proteanEntity.precision;
             proteanEntity.precision = currentStat;
             StatusEffect ProteanObject = new StatusEffect("Localized Proteanism", LocalizedProteanism, proteanIntegerForTypeChecking);
-            ApplyStatusEffect(proteanEntity, ProteanObject);
+            ReapplyStatusEffect(proteanEntity, ProteanObject);
         }
 
         //DamageRoll:
