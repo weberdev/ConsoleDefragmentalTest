@@ -65,7 +65,7 @@ namespace CombatTest
         {
             Console.WriteLine("A glorious dodge and reflexive counterattack!");
             Random rng = new Random();
-            CombatMechanics.Attack(dodging, missedAttacker, dodging.precision, missedAttacker.agility, rng, 0);
+            CombatMechanics.Attack(dodging, missedAttacker, dodging.getPrecision(), missedAttacker.getAgility(), rng, 0);
         }
         //StabilizingField
         //Adjusts the player's successValue downward (making it easier) and bonusRolls Downward (fewer generated
@@ -85,7 +85,7 @@ namespace CombatTest
         //If a die roll is a one, get an additional roll, take one damage.
         public static int OphidianCyclops(Entity player)
         {
-            player.currentHP-= 1;
+            player.changeCurrentHP(-1);
             return 1;
         }
         

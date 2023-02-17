@@ -39,11 +39,11 @@ namespace CombatTest
         {
             EndOfTurnForIndividual(player);
             EndOfTurnForIndividual(foe);
-            if(player.currentHP< 0)
+            if(player.getCurrentHP()< 0)
             {
                 Defeat();
             }
-            else if(foe.currentHP< 0)
+            else if(foe.getCurrentHP()< 0)
             {
                 Random rng = new Random();
                 Victory(player, foe, rng);
@@ -92,12 +92,13 @@ namespace CombatTest
                 ReapplyStatusEffect(poisonedEntity, PoisonObject);
             }
         }
-        public static void LocalizedProteanism(Entity proteanEntity, int proteanIntegerForTypeChecking) {
-            int currentStat = proteanEntity.power;
-            proteanEntity.power = proteanEntity.agility;
-            proteanEntity.agility = proteanEntity.endurance;
-            proteanEntity.endurance = proteanEntity.precision;
-            proteanEntity.precision = currentStat;
+        public static void LocalizedProteanism(Entity proteanEntity, int proteanIntegerForTypeChecking)
+        {
+            int currentStat = proteanEntity.getPower();
+            proteanEntity.setPower(proteanEntity.getAgility());
+            proteanEntity.setAgility(proteanEntity.getEndurance());
+            proteanEntity.setEndurance(proteanEntity.getPrecision());
+            proteanEntity.setPrecision(currentStat);
             StatusEffect ProteanObject = new StatusEffect("Localized Proteanism", LocalizedProteanism, proteanIntegerForTypeChecking);
             ReapplyStatusEffect(proteanEntity, ProteanObject);
         }
@@ -125,7 +126,7 @@ namespace CombatTest
         //damage is dealt to a target entity and is subtracted from their current HP
         public static void DealDamage(Entity target, int damage)
         {
-            target.currentHP -= damage;
+            target.changeCurrentHP(-damage);
         }
         //Attack:
         //takes in two entities, an attacker and a defender, as well as their defensive stats
@@ -164,13 +165,13 @@ namespace CombatTest
         //When the foe's HP is 0 or less, the loop ends.
         public static void FightLoop(Gamestate protagonist, Monster foe, Random fate)
         {
-            Console.WriteLine($"The {foe.name} approaches!");
-            string statBlock = foe.statString;
+            Console.WriteLine($"The {foe.getName()} approaches!");
+            string statBlock = foe.DisplayStats();
             Console.WriteLine(statBlock);
-            while (foe.currentHP > 0)
+            while (foe.getCurrentHP() > 0)
             {
-                Console.WriteLine($"{protagonist.name}: HP: {protagonist.currentHP}/{protagonist.maxHP} SKEW: {protagonist.currentSkew}/{protagonist.maxSkew}");
-                Console.WriteLine($"{foe.name}: {foe.currentHP}/{foe.maxHP}");
+                Console.WriteLine($"{protagonist.getName()}: HP: {protagonist.getCurrentHP()}/{protagonist.getMaxHP()} SKEW: {protagonist.currentSkew}/{protagonist.maxSkew}");
+                Console.WriteLine($"{foe.getName()}: {foe.getCurrentHP()}/{foe.getMaxHP()}");
                 Console.WriteLine("This is the demo, you may only attack.");
                 PlayerAttack(foe, protagonist, fate);
             }
@@ -233,19 +234,19 @@ namespace CombatTest
             if (actionChoice == "h")
             {
                 Console.WriteLine("You swing boldly.");
-                Attack(protagonist, foe, protagonist.power, foe.endurance, fate, skewUsed);
+                Attack(protagonist, foe, protagonist.getPower(), foe.getEndurance(), fate, skewUsed);
             }
             else if (actionChoice == "p")
             {
                 Console.WriteLine("You swing precisely.");
-                Attack(protagonist, foe, protagonist.precision, foe.agility, fate, skewUsed);
+                Attack(protagonist, foe, protagonist.getPrecision(), foe.getAgility(), fate, skewUsed);
             }
             else
             {
                 Console.WriteLine("Code shouldn't have been able to get here.");
                 Console.WriteLine("You might have been trying to cast a spell");
             }
-            if (foe.currentHP < 1) { Victory(protagonist, foe, fate); }
+            if (foe.getCurrentHP() < 1) { Victory(protagonist, foe, fate); }
             else { MonsterAttack(foe, protagonist, fate, 0); }
 
         }
@@ -266,49 +267,51 @@ namespace CombatTest
         //Otherwise the fight continues. 
         private static void MonsterAttack(Monster foe, Gamestate protagonist, Random fate, int skew)
         {
-            int betterAttackingStat = Math.Max(foe.power, foe.precision);
-            int worseAttackingStat = Math.Min(foe.power, foe.precision);
-            int betterTargetStat = Math.Min(protagonist.agility, protagonist.endurance);
-            int worseTargetStat = Math.Min(protagonist.agility, protagonist.endurance);
-            Console.WriteLine($"It is now the {foe.name}'s turn.");
+            int betterAttackingStat = Math.Max(foe.getPower(), foe.getPrecision());
+            int worseAttackingStat = Math.Min(foe.getPower(), foe.getPrecision());
+            int betterTargetStat = Math.Min(protagonist.getAgility(), protagonist.getEndurance());
+            int worseTargetStat = Math.Min(protagonist.getAgility(), protagonist.getEndurance());
+            Console.WriteLine($"It is now the {foe.getName()}'s turn.");
             if (DiceMechanics.DieRoll(3, fate) > 2)
             {
-                if (betterAttackingStat == foe.power && betterTargetStat == protagonist.endurance)
+                if (betterAttackingStat == foe.getPower() && betterTargetStat == protagonist.getEndurance())
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
+                    Attack(foe, protagonist, foe.getPower(), protagonist.getEndurance(), fate, 0);
                 }
-                else if (betterAttackingStat == foe.precision && betterTargetStat == protagonist.agility)
+                else if (betterAttackingStat == foe.getPrecision() && betterTargetStat == protagonist.getAgility())
                 {
-                    Attack(foe, protagonist, foe.precision, protagonist.endurance, fate, 0);
+                    Attack(foe, protagonist, foe.getPrecision(), protagonist.getEndurance(), fate, 0);
                 }
                 else if (betterAttackingStat == worseAttackingStat)
                 {
                     Attack(foe, protagonist, betterAttackingStat, worseTargetStat, fate, 0);
                 }
-                else if (foe.power - protagonist.endurance > foe.precision - protagonist.agility)
+                else if (foe.getPower() - protagonist.getEndurance() > foe.getPrecision() - protagonist.getAgility())
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
+                    Attack(foe, protagonist, foe.getPower(), protagonist.getEndurance(), fate, 0);
 
                 }
-                else if (foe.power - protagonist.endurance < foe.precision - protagonist.agility)
+                else if (foe.getPower() - protagonist.getEndurance() < foe.getPrecision() - protagonist.getAgility())
                 {
-                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0);
-                }
-                else { 
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0); }
-            }
-            else
-            {
-                if (foe.power < foe.precision)
-                {
-                    Attack(foe, protagonist, foe.precision, protagonist.agility, fate, 0);
+                    Attack(foe, protagonist, foe.getPrecision(), protagonist.getAgility(), fate, 0);
                 }
                 else
                 {
-                    Attack(foe, protagonist, foe.power, protagonist.endurance, fate, 0);
+                    Attack(foe, protagonist, foe.getPower(), protagonist.getEndurance(), fate, 0);
                 }
             }
-            if (protagonist.currentHP < 1) { Defeat(); }
+            else
+            {
+                if (foe.getPower() < foe.getPrecision())
+                {
+                    Attack(foe, protagonist, foe.getPrecision(), protagonist.getAgility(), fate, 0);
+                }
+                else
+                {
+                    Attack(foe, protagonist, foe.getPower(), protagonist.getEndurance(), fate, 0);
+                }
+            }
+            if (protagonist.getCurrentHP() < 1) { Defeat(); }
             EndOfTurn(protagonist, foe);
         }
         //Victory:
@@ -327,7 +330,7 @@ namespace CombatTest
             MonsterTable.Add(new Monster("Slime Hydra", 15, 6, 6, 6, 6, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Rotating Fiend", 10, 5, 6, 4, 3, 3, DiceMechanics.StatRoll));
             MonsterTable.Add(new Monster("Recursed Wanderer", 8, 2, 2, 7, 7, 3, CardMechanics.StatDraw));
-            Console.WriteLine($"The {foe.name} is slain!");
+            Console.WriteLine($"The {foe.getName()} is slain!");
             protagonist.GainStats(fate, protagonist.threshold);
             Console.ReadKey();
             int listLength = MonsterTable.Count;

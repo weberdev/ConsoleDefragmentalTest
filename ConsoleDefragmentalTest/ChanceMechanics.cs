@@ -319,7 +319,7 @@ namespace CombatTest
                         activeEntity.Discard.Remove(discardedCard);
                         if (!deckHasBeenDrawn)
                         {
-                            activeEntity.currentHP = activeEntity.maxHP;
+                            activeEntity.setCurrentHP(activeEntity.getMaxHP());
                             deckHasBeenDrawn = true;
                         }
                         else
