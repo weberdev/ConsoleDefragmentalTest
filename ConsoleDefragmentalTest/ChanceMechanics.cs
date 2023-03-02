@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Xyaneon.Games.Cards;
 using Xyaneon.Games.Cards.StandardPlayingCards;
 
 namespace CombatTest
@@ -35,9 +33,9 @@ namespace CombatTest
         //The target can decrease, but will never increase. 
         public static int AttemptASpell(int totalStat, Random fate, Entity ActiveEntity, int skew = 0)
         {
-            int DIESIZE = (ActiveEntity.statDie)+skew;
-            int SCALAR = (ActiveEntity.statDie)/2;
-            int target = (totalStat * SCALAR)-skew;
+            int DIESIZE = (ActiveEntity.statDie) + skew;
+            int SCALAR = (ActiveEntity.statDie) / 2;
+            int target = (totalStat * SCALAR) - skew;
             int currentTotal = 0;
             string choice = "t";
             int currentScore = 0;
@@ -104,7 +102,7 @@ namespace CombatTest
         //fate is the default random object
         public static int DieRoll(int dieSize, Random fate)
         {
-            int roll = fate.Next(1, dieSize+1);
+            int roll = fate.Next(1, dieSize + 1);
             return roll;
         }
         //OpposedRoll:
@@ -167,11 +165,11 @@ namespace CombatTest
                 else if (currentRoll == 1)
                 {
                     if (DieRollIsOneEvent != null && (activeEntity is Gamestate))
-                        {
-                            i-=DieRollIsOneEvent(activeEntity);
-                        }
+                    {
+                        i -= DieRollIsOneEvent(activeEntity);
                     }
-                
+                }
+
                 else
                 {
                     Console.Write(".");
@@ -302,12 +300,12 @@ namespace CombatTest
         //This will no longer run infinitely.
         //As it no longer runs infinitely, the unreasonably impressive result is written off as "working as intended", particularly as it is uncommon.
         //This may be fixed later on.
-        public static int StatDraw(int totalStat, Random rand, Entity activeEntity, int skew= 0)
+        public static int StatDraw(int totalStat, Random rand, Entity activeEntity, int skew = 0)
         {
             int defaultSuccess = 9 - skew;
             int successes = 0;
             bool deckHasBeenDrawn = false;
-            for (int i = 0-skew; i < totalStat; i++)
+            for (int i = 0 - skew; i < totalStat; i++)
             {
                 if (activeEntity.Deck.IsEmpty)
                 {
@@ -350,8 +348,8 @@ namespace CombatTest
                         Console.WriteLine(SPCToString(currCard) + "! A success and an additional draw!");
                         break;
                     case 12:
-                        successes ++;
-                        i-=2;
+                        successes++;
+                        i -= 2;
                         Console.WriteLine(SPCToString(currCard) + "! A success and two additional draws!");
                         break;
                     case > 12:

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 
 namespace CombatTest
 {
@@ -23,12 +22,12 @@ namespace CombatTest
                 activeEffect.statusName(currentEntity, activeEffect.statusCounter);
                 currentEntity.NextEndOfTurnStatusEffects.Remove(activeEffect);
             }
-            foreach(StatusEffect inactiveEffect in currentEntity.NextEndOfTurnStatusEffects)
+            foreach (StatusEffect inactiveEffect in currentEntity.NextEndOfTurnStatusEffects)
             {
                 currentEntity.EndOfTurnStatusEffects.Add(inactiveEffect);
             }
             currentEntity.NextEndOfTurnStatusEffects.Clear();
-            currentEntity.EndOfTurnStatusEffects= currentEntity.MergeStatusEffects(currentEntity.EndOfTurnStatusEffects);
+            currentEntity.EndOfTurnStatusEffects = currentEntity.MergeStatusEffects(currentEntity.EndOfTurnStatusEffects);
         }
         //EndOfTurn:
         //Called at the end of a turn cycle. Calls EndOfTurnForIndividual on the player and foe.
@@ -39,11 +38,11 @@ namespace CombatTest
         {
             EndOfTurnForIndividual(player);
             EndOfTurnForIndividual(foe);
-            if(player.getCurrentHP()< 0)
+            if (player.getCurrentHP() < 0)
             {
                 Defeat();
             }
-            else if(foe.getCurrentHP()< 0)
+            else if (foe.getCurrentHP() < 0)
             {
                 Random rng = new Random();
                 Victory(player, foe, rng);
@@ -59,7 +58,8 @@ namespace CombatTest
         //ReapplyStatusEffect
         //Takes an entity and a statusEffect object.
         //appends the statusEffect to the NextEndOfTurnStatus list.
-        public static void ReapplyStatusEffect(Entity currentEntity, StatusEffect currentEffect) {
+        public static void ReapplyStatusEffect(Entity currentEntity, StatusEffect currentEffect)
+        {
             currentEntity.NextEndOfTurnStatusEffects.Add(currentEffect);
         }
         //Bleed:
@@ -72,11 +72,11 @@ namespace CombatTest
         {
             int breakpoint = 3;
             DealDamage(bleedingEntity, bleedCounter);
-            int nextBleed = (int)Math.Sqrt((bleedCounter ^ 2)-(breakpoint^2+1));
+            int nextBleed = (int)Math.Sqrt((bleedCounter ^ 2) - (breakpoint ^ 2 + 1));
             if (nextBleed > 0)
             {
                 StatusEffect BleedObject = new StatusEffect("Bleed", Bleed, nextBleed);
-                ReapplyStatusEffect(bleedingEntity,BleedObject);
+                ReapplyStatusEffect(bleedingEntity, BleedObject);
             }
         }
         //Poison:
@@ -88,7 +88,7 @@ namespace CombatTest
             DealDamage(poisonedEntity, poisonCounter);
             if (poisonCounter > 1)
             {
-                StatusEffect PoisonObject = new StatusEffect("Poison", Poison, poisonCounter- 1);
+                StatusEffect PoisonObject = new StatusEffect("Poison", Poison, poisonCounter - 1);
                 ReapplyStatusEffect(poisonedEntity, PoisonObject);
             }
         }

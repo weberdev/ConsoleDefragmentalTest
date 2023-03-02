@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xyaneon.Games.Cards;
-using Xyaneon.Games.Cards.StandardPlayingCards;
 
 namespace CombatTest
 {
-    
+
     class Program
     {
         static void Main(string[] args)
@@ -19,7 +15,7 @@ namespace CombatTest
             yourName = Console.ReadLine();
             Console.WriteLine($"Howdy, {yourName}, are you a dice thrower or a card hustler? D for dice, C for cards.");
             yourResolution = Console.ReadLine().ToLower();
-            while(yourResolution!= "c" && yourResolution != "d")
+            while (yourResolution != "c" && yourResolution != "d")
             {
                 Console.WriteLine("Please choose dice or cards. C or D.");
                 yourResolution = Console.ReadLine().ToLower();
@@ -29,7 +25,7 @@ namespace CombatTest
             {
                 currentState.ResolutionFunction = CardMechanics.StatDraw;
             }
-            else 
+            else
             {
                 currentState.ResolutionFunction = DiceMechanics.StatRoll;
             }

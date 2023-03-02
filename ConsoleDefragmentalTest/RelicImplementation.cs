@@ -68,7 +68,7 @@ namespace CombatTest
             CombatMechanics.Attack(dodging, missedAttacker, dodging.getPrecision(), missedAttacker.getAgility(), rng, 0);
         }
         //StabilizingField
-        //Adjusts the player's successValue downward (making it easier) and bonusRolls Downward (fewer generated
+        //Adjusts the player's successValue downward (making it easier) and bonusRolls Downward (fewer generated)
         public static void StabilizingField(Entity target)
         {
             target.successValue -= 1;

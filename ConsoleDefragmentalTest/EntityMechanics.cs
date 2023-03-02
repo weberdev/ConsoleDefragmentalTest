@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xyaneon.Games.Cards.StandardPlayingCards;
 
 namespace CombatTest
@@ -60,6 +57,7 @@ namespace CombatTest
 
         public void changeMaxHP(int changeBY)
         {
+            maxHP += changeBY;
             currentHP += changeBY;
             if (currentHP > maxHP)
             {
@@ -98,7 +96,7 @@ namespace CombatTest
         }
         public int getPower()
         {
-            return this.getPower();
+            return this.power;
         }
         public void incPower()
         {
@@ -111,7 +109,7 @@ namespace CombatTest
         }
         public int getPrecision()
         {
-            return this.getPrecision();
+            return this.precision;
         }
         public void incPrecision()
         {
@@ -125,7 +123,7 @@ namespace CombatTest
         }
         public int getEndurance()
         {
-            return this.getEndurance();
+            return this.endurance;
         }
         public void incEndurance()
         {
@@ -138,7 +136,7 @@ namespace CombatTest
         }
         public int getAgility()
         {
-            return this.getAgility();
+            return this.agility;
         }
         public void incAgility()
         {
@@ -224,11 +222,11 @@ namespace CombatTest
         {
             Monster newMonster = new Monster(baseMonster.getName(), baseMonster.getMaxHP(), baseMonster.getPower(), baseMonster.getPrecision(), baseMonster.getEndurance(), baseMonster.getAgility(), baseMonster.damageDie, baseMonster.ResolutionFunction);
             return newMonster;
-        }   
+        }
     }
-            
-        
-    
+
+
+
     //this class will be expanded when moving from console to unity
     public class Location
     {
